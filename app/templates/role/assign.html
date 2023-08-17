@@ -1,0 +1,15 @@
+{% extends "baseform.html" %}
+{% block title %}Asignar rol{% endblock %}
+{% block formtitle %}
+    <h1>Asignar rol</h1>    
+{% endblock %}
+{% block form %}
+    <form action="{{ url_for('role_assign', id=request.args.get('id')) }}" method="POST">
+        {{ form.csrf_token }}
+        <div class="form-group">
+            {{ form.role }}
+        </div>
+        <button type="submit" class="btn btn-primary">Asignar</button>
+        <a href="{{ url_for('role_show', id=request.args.get('id')) }}" class="btn btn-secondary">Volver</a>
+    </form>            
+{% endblock %}

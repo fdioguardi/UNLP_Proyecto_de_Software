@@ -1,0 +1,33 @@
+{% extends "baseform.html" %}
+{% block title %}Editar Usuarios{% endblock %}
+{% block formtitle %}
+<h1>Editar un usuario</h1>
+{% endblock %}
+{% block form %}
+<form action="{{ url_for('user_edit', id=request.args.get('id')) }}" method="POST">
+  {{ form.csrf_token }}
+  <div class="form-group">
+    {{ form.email.label }} 
+    {{ form.email }}
+  </div>
+  <div class="form-group">
+    {{ form.username.label }} 
+    {{ form.username }}
+  </div>
+  <div class="form-group">
+    {{ form.password.label }}  
+    {{ form.password }}
+  </div>
+  <div class="form-group">
+    {{ form.first_name.label }} 
+    {{ form.first_name }}
+  </div>
+  <div class="form-group">
+    {{ form.last_name.label }} 
+    {{ form.last_name }}
+  </div>
+  <button type="submit" class="btn btn-primary">Editar usuario</button>
+  <a href="{{ url_for('user_index') }}" class="btn">Volver al listado de usuarios</a>
+</form>
+{% endblock %}
+    

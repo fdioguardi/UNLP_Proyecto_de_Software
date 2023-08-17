@@ -1,0 +1,36 @@
+{% extends "baseform.html" %}
+{% block title %}Agregar Usuarios{% endblock %}
+{% block formtitle %}
+<h1>Crear un usuario</h1>
+{% endblock %}
+{% block form %}
+<form action="{{ url_for('user_create') }}" method="POST">
+  {{ form.csrf_token }}
+  <div class="form-group">
+    {{ form.email.label }} 
+    {{ form.email }}
+  </div>
+  <div class="form-group">
+    {{ form.username.label }} 
+    {{ form.username }}
+  </div>
+  <div class="form-group">
+    {{ form.password.label }}  
+    {{ form.password }}
+  </div>
+  <div class="form-group">
+    {{ form.first_name.label }} 
+    {{ form.first_name }}
+  </div>
+  <div class="form-group">
+    {{ form.last_name.label }} 
+    {{ form.last_name }}
+  </div>
+  <div class="form-group">
+    {{ form.active.label }} 
+    {{ form.active }}
+  </div>
+  <button type="submit" class="btn btn-primary">Crear usuario</button>
+  <a href="{{ url_for('user_index') }}" class="btn">Volver al listado de usuarios</a>
+</form>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+{% block title %}Turnos{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h1>Turnos</h1>
+        <hr>
+        <form action="{{ url_for('turn_search') }}">
+            <div class="row">
+                <div class="form-group col-6">
+                    {{ search_form.select.label }}
+                    {{ search_form.select(list="dt") }}
+                    <datalist id="dt">
+                        {% for center in centers %}
+                            <option value="{{ center.name }}"></option>
+                        {% endfor %}>
+                    </datalist>
+                </div>
+                <div class="form-group col-6">
+                    {{ search_form.search.label }}
+                    {{ search_form.search }}
+                </div>
+                <div class="form-group col-8">
+                <input class="btn btn-warning" type="submit" value="Buscar">
+                </div>
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+              <thead>
+                <tr>
+                    <th scope="col">Centro</th>
+                    <th scope="col">Correo Electronico</th>
+                    <th scope="col">Dia</th>
+                    <th scope="col">Horario</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for turn in turns.items %}
+                    <tr>
+                        <td>{{ turn.center.name }}</td>
+                        <td>{{ turn.email }}</td>
+                        <td>{{ turn.day }}</td>
+                        <td>{{ turn.schedule.start.isoformat(timespec="minutes") }} a {{ turn.schedule.end.isoformat(timespec="minutes") }}</td>
+                        <td>          
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modal-{{ turn.id }}">
+                                Eliminar
+                            </button>
+                            <div class="modal fade" id="modal-{{ turn.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Eliminar Turno</h5>
+                                            <button type="button" class="close" data-dismiss="modal">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>¿Estás seguro que querés eliminar el turno de "{{ turn.email }}" para el centro "{{ turn.center.name }}"" del dia "{{ turn.day }}"?</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                            <form action="{{ url_for('turn_delete', search=search_form.search.data, select=search_form.select.data) }}" method="POST">
+                                                {{ delete_form.csrf_token }}
+                                                {{ delete_form.turn_id(value=turn.id) }}
+                                                <button type="submit" class="btn btn-danger">Confirmar</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <ul class="pagination">
+                {% if turns.has_prev %}
+                <li class="page-item"> <a class="page-link" href="{{ url_for('turn_search', page=turns.prev_num, search=search_form.search.data, select=search_form.select.data) }}">Anterior</a></li>
+                {% else %}
+                <li class="page-item"><a class="page-link btn disabled" href="#">Anterior</a></li>
+                {% endif %}
+      
+      
+                {% if turns.has_next %}
+                <li class="page-item"> <a class="page-link" href="{{ url_for('turn_search', page=turns.next_num, search=search_form.search.data, select=search_form.select.data) }}">Siguiente</a></li>
+                {% else %}
+                <li class="page-item"><a class="page-link btn disabled" href="#">Siguiente</a></li>
+                {% endif %}     
+            </ul>
+        </div>
+        <a href="{{ url_for('home') }}" class="btn">Volver</a>
+      </div>
+    </div>
+</div>
+{% endblock %}

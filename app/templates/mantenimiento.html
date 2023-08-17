@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}Mantenimiento{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+    <div class ="container" style="margin-top: 20%;">
+        <div class="row align-items-center ">
+            <div class="col-lg-3 col-md-8 ">
+                <img src="/static/imagenes/mantenimiento.png" class="card-img-top" alt="Hombre realizando seña de stop">
+            </div>
+            <div class="alert alert-danger text-center col-lg-8 col-md-14" role="alert">
+                <h4 class="alert-heading ">¡ATENCIÓN! ESTIMADO USUARIO</h4>
+                <h5 class="alert-heading ">¡Hoy nos toca hacer el mantenimiento a nuestra web!</h5>
+                <P>Disculpe las molestias y gracias por la comprención </P>
+                <hr>
+                <p class="mb-0 ">Inténtalo de nuevo más tarde o contacta con el administrador.</p>
+            </div>
+            
+        </div>
+        <div class="row justify-content-center">
+            {% if not is_authenticated(session) %} 
+                 <a href="{{ url_for('auth_login') }}" class="btn btn-secondary">Volver al inicio de sesión</a>
+            {% endif %} 
+        </div>
+    </div>
+   
+{% endblock %}

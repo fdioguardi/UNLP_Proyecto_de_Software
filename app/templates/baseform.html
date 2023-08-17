@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+<section class="container border border-light p-5">
+    {% block formtitle %}
+    {% endblock %}
+    {% for field, errors in form.errors.items() %}
+      <div class="alert alert-danger" role="alert">
+          
+          {{ ', '.join(errors) }}
+      </div>
+    {% endfor %}
+    {% block form %}
+    {% endblock %}
+</section>
+{% endblock %}

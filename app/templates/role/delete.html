@@ -1,0 +1,13 @@
+{% extends "baseform.html" %}
+{% block title %}Asignar rol{% endblock %}
+{% block formtitle %}
+    <h1>Borrar Rol</h1>
+{% endblock %}
+{% block form %}
+    <form action="{{ url_for('role_delete', id=request.args.get('id'), role=request.args.get('role')) }}" method="POST">
+        {{ form.csrf_token }}
+        <div class="alert alert-danger">El Rol {{request.args.get('role')}} sera borrado del Usuario {{request.args.get('user_name')}}. ¿Estas seguro?</div>
+        <button type="submit" class="btn btn-danger">Borrar</button>
+        <a href="{{ url_for('role_show', id=request.args.get('id')) }}" class="btn btn-secondary">Volver</a>
+    </form>            
+{% endblock %}

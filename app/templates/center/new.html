@@ -1,0 +1,195 @@
+{% extends "layout.html" %}
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet-src.js"></script>
+<!-- Load Esri Leaflet from CDN -->
+<script src="https://unpkg.com/esri-leaflet"></script>
+<!-- Esri Leaflet Geocoder -->
+<link rel="stylesheet" href="https://unpkg.com/esri-leaflet-geocoder/dist/esri-leaflet-geocoder.css" />
+<script src="https://unpkg.com/esri-leaflet-geocoder"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+{% endblock %}
+{% block title %}Crear Centro{% endblock %}
+{% block content %}
+<section class="container border border-light p-5" id="app" >
+    <h1>Crear un centro</h1>
+    <form action="{{ url_for('center_create') }}" onsubmit="submitHandler(event)" method="POST" enctype="multipart/form-data">
+
+        {%if form_validate%}
+        {% for field, errors in form_validate.errors.items() %}
+        <div class="alert alert-danger" role="alert">
+          {{ ', '.join(errors) }}
+         </div>
+        {% endfor %}
+        {%endif%}
+        {% if error%}
+        <div class="alert alert-danger" role="alert">
+            Hubo un error en la carga de pdf, vuelva a intentarlo.
+        </div>
+        {%endif%}
+        <p v-if="errors.length"></p>
+        <div class="alert alert-danger" role="alert" v-for="error in errors">
+            [[error]]
+        </div>
+        <div class="form-group">
+            <label>Nombre</label>
+            <input class="form-control" v-model="name" type="text" id="name" name="name" required>
+        </div>
+
+        </div>
+        <div class="map-container"></div>
+        <label>Direccion</label>
+        <input class="form-control" name="address" id="address" value="{{form.address}}" readonly>
+        <br>
+        <div id="mapid" style="height: 300px;" name="address" class="leaflet-container">
+        </div>
+
+        <input type="hidden" id="lat" name="lat" value="{{form.latitude}}">
+        <input type="hidden" name="lng" id='lng' value="{{form.longitude}}">
+        <input type="hidden" name="town_id" id="town_id" value="{{form.town}}">
+        <input type="hidden" name="center_type" id="center_type" value="{{form.center_type}}">
+
+        <div class="form-group">
+            <label>Telefono</label>
+            <input class="form-control" value="" v-model="phone" type="text" name="phone"  placeholder="xxx-xxx-xxxx" required>
+        </div>
+
+        <div class="form-group">
+            <label>Hora de apertura</label>
+            <input class="form-control" type="time" name="opens" v-model="opens" required>
+        </div>
+
+        <div class="form-group">
+            <label>Hora de cierre</label>
+            <input class="form-control" type="time" name="closes" v-model="closes" required>
+        </div>
+
+        <div class="form-group">
+            <label>Municipio</label>
+            <select v-model="selectedTown" value="" id="selectedTown" name="town" class="form-control" @change="asignar_town_id" required>
+                <option v-for="town in towns" :value="town.id">[[town.id]]-[[town.name]](Fase:[[town.phase]]) </option>
+            </select>
+        </div>
+
+
+        <div class="form-group">
+            <label>Pagina web</label>
+            <input class="form-control" type="text" name="web" value="" v-model="web" placeholder="www.ejemplo.com">
+        </div>
+
+        <div class="form-group">
+            <label>Correo electronico</label>
+            <input class="form-control" type="email" value="" name="email" v-model="email" placeholder="ejemplo@ejemplo.com">
+        </div>
+
+        <div class="form-group">
+            <label>Protocolo de vista</label>
+            <input class="form-control" name='archivo' type="file" id='file' v-on:change="assingValue">
+        </div>
+
+        <div class="form-group">
+            <label>Tipo de centro</label>
+            <select v-model="selectedCentrer"  value="" id="selectedCentrer" class="form-control" @change="assing_center_type"
+                required>
+                <option v-for="center in {{form.center_types}}" :value="center">[[center]]</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" id="boton1" @click="validate_and_send($event)">Agregar
+            centro</button>
+        <a href="{{ url_for('center_index') }}" class="btn">Volver al listado de centros</a>
+    </form>
+
+</section>
+
+<script>
+    var app = new Vue({
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        data: {
+            errors: [],
+            name: "{{form.name}}",
+            direccion: null,
+            latitud: null,
+            long: null,
+            phone:"{{form.phone}}",
+            opens: "{{form.opens}}",
+            closes: "{{form.closes}}",
+            web: "{{form.web}}",
+            email: "{{form.email}}",
+            towns: {},
+            selectedTown: "{{form.town}}",
+            selectedCentrer:"{{form.center_type}}",
+            protocol: null,
+        },
+        methods: {
+            assingValue: function () {
+                if (document.getElementById('file').files.length > 0) {
+                    this.protocol = document.getElementById('file').files[0].name;
+                }
+                return true;
+            },
+            pedirMunicipios: function () {
+                fetch('https://api-referencias.proyecto2020.linti.unlp.edu.ar/municipios')
+                    .then(response => response.json())
+                    .then(json => {
+                        this.towns = json.data.Town
+                    })
+            },
+            asignar_town_id: function () {
+                document.getElementById('town_id').setAttribute('value', this.selectedTown);
+            },
+            assing_center_type: function () {
+                document.getElementById("center_type").setAttribute("value", this.selectedCentrer);
+            },
+
+            validate_and_send: function (event) {
+                this.errors = [];
+
+                if (!this.validatePDF()) {
+                    this.errors.push("Debe seleccionar un archivo con extensión .pdf")
+                }
+                if (!this.validateTel()) {
+                    //this.errors.push("Número de teléfono inválido");
+                }
+                if (!this.validateWeb()) {
+                    this.errors.push("Pagina web inválida");
+                }
+                if (!this.validateName()) {
+                    this.errors.push("Debe ingresar un nombre válido");
+                }
+                if (this.errors.length === 0) {
+                    return true;
+                }
+                event.preventDefault();
+
+            },
+            validateTel: function () {
+                let regex = /^(\d{3})[-]?(\d{3})[-]?(\d{4})$/
+                var found = regex.test(this.tel);
+                return found;
+            },
+            validateWeb: function () {
+                if (this.web) {
+                    let regex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/
+                    var found = regex.test(this.web);
+                    return found;
+                }
+                return true;
+            },
+            validatePDF: function () {
+                if (this.protocol) {
+                    return (this.protocol.split(".")[this.protocol.split(".").length - 1] === "pdf")
+                }
+                return true;
+            },
+            validateName: function() {
+                return (this.name.trim() != "")
+            }
+        },
+        created() {
+            this.pedirMunicipios();
+        }
+    })
+</script>
+{% endblock %}

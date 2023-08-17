@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h1>Administración de Usuarios</h1>
+      <hr>
+
+      <form action="{{ url_for('user_index') }}">
+        <div class="row">
+          <div class="form-group col-8">
+            {{ search_form.search.label }}
+            {{ search_form.search }}
+          </div>
+        <div class="form-group col-4">
+          {{ search_form.select.label }}
+          {{ search_form.select }}
+        </div>
+        <div class="form-group col-8">
+          <input class="btn btn-warning" type="submit" value="Buscar">
+        </div>
+        </div>
+      </form>
+
+      <div class="table-responsive">
+        <table class="table table-hover table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Correo electrónico</th>
+              <th scope="col">Nombre de usuario</th>
+              <th scope="col">Nombre</th>
+              <th scope="col">Apellido</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users.items %}
+            <tr>
+              <td>{{ user.email }}</td>
+              <td>{{ user.username }}</td>
+              <td> {{ user.first_name }}</td>
+              <td>{{ user.last_name }}</td>
+              <td>
+                <div class="row justify-content-around">
+                  <a href="{{ url_for('user_edit', id=user.id)}}" class="btn btn-success btn-sm">
+                    Editar
+                  </a>
+                  <a href="{{ url_for('role_show', id=user.id)}}" class="btn btn-dark btn-sm">
+                    Roles
+                  </a>
+
+                   {% if has_role(user,"Admin") %}
+                       {% set should_be_disabled = 'disabled' %}
+                   {% else %}
+                       {% set should_be_disabled = '' %}
+                   {% endif %}
+
+                  <form action="{{ url_for('user_state') }}" method="POST">
+                    {{ state_form.csrf_token }}
+                    {{ state_form.user_id(value=user.id) }}
+                    <button type="submit" class="btn btn-info btn-sm {{ should_be_disabled }}" {{ should_be_disabled }}>
+                      {% if user.active %}
+                      Bloquear
+                      {% else %}
+                      Desbloquear
+                      {% endif %}
+                    </button>
+                  </form>
+
+                  <!-- Button trigger modal -->
+                  <button type="button" class="btn btn-danger btn-sm {{ should_be_disabled }}" {{ should_be_disabled }} data-toggle="modal" data-target="#modal-{{ user.id }}">
+                    Eliminar
+                  </button>
+
+                  <!-- Modal -->
+                  <div class="modal fade" id="modal-{{ user.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Eliminar usuario</h5>
+                          <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          <p>¿Estás seguro que querés eliminar al usuario "{{ user.username }}"?</p>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                          <form action="{{ url_for('user_delete') }}" method="POST">
+                            {{ delete_form.csrf_token }}
+                            {{ delete_form.user_id(value=user.id) }}
+                            <button type="submit" class="btn btn-danger">Confirmar</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <ul class="pagination">
+          {% if users.has_prev %}
+          <li class="page-item"> <a class="page-link" href="{{ url_for('user_index', page=users.prev_num, search=search_form.search.data, select=search_form.select.data) }}">Anterior</a></li>
+          {% else %}
+          <li class="page-item"><a class="page-link btn disabled" href="#">Anterior</a></li>
+          {% endif %}
+
+
+          {% if users.has_next %}
+          <li class="page-item"> <a class="page-link" href="{{ url_for('user_index', page=users.next_num, search=search_form.search.data, select=search_form.select.data) }}">Siguiente</a></li>
+          {% else %}
+          <li class="page-item"><a class="page-link btn disabled" href="#">Siguiente</a></li>
+          {% endif %}
+
+        </ul>
+
+      </div>
+      <a href="{{ url_for('user_new') }}" class="btn btn-primary">Nuevo usuario</a>
+      <a href="{{ url_for('home') }}" class="btn">Volver al inicio</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+

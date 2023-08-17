@@ -1,0 +1,32 @@
+{% extends "baseform.html" %}
+{% block title %}Configuración{% endblock %}
+{% block formtitle %}
+    <h1>Configuración</h1>
+{% endblock %}
+{% block form %}
+    <form action="{{ url_for('configuration_update')}}" method="POST">
+        {{ form.csrf_token }}
+        <h4>Informacion de la pagina principal</h4>
+        <div class="form-group">
+            {{ form.titulo.label }}
+            {{ form.titulo }}
+        </div>
+        <div class="form-group">
+            {{ form.descripcion.label }} 
+            {{ form.descripcion }}
+        </div>
+        <div class="form-group">
+            {{ form.email.label }} 
+            {{ form.email}} 
+        </div>
+        <div class="form-group">
+            {{ form.cantElement.label }} 
+            {{ form.cantElement }} 
+        </div>
+        <div class="form-group">
+            {{ form.habilitado.label }} 
+            {{ form.habilitado }} 
+        </div> 
+        <input type="submit" class="btn btn-primary" value="Guardar cambios">
+    </form>
+{% endblock %}

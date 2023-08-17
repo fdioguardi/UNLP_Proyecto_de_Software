@@ -1,0 +1,21 @@
+{% extends "baseform.html" %}
+{% block title %}
+  Entrar
+{% endblock %}
+{% block formtitle %}
+  <h2>Iniciar sesión</h2>
+{% endblock %}
+{% block form %}
+  <form action="{{ url_for('auth_authenticate') }}" method="POST">
+    {{ form.csrf_token }}
+    <div class="form-group">
+      {{ form.email.label }} 
+      {{ form.email }}
+    </div>
+    <div class="form-group">
+      {{ form.password.label }}  
+      {{ form.password }}
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+  </form>
+{% endblock %}
